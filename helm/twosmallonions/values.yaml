@@ -1,0 +1,4 @@
+api:
+  maxFileSize: "10MB"
+  maxRequestSize: "11MB"
+  managementPort: 9517

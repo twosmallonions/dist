@@ -1,0 +1,33 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ .Release.Name }}-api-config
+  namespace: default
+data:
+  application.yaml: |-
+    spring:
+      servlet:
+        multipart:
+          max-file-size: {{ .Values.api.maxFileSize | default "10MB" | quote }}
+          max-request-size: {{ .Values.api.maxRequestSize | default "11MB" | quote }}
+      security:
+        oauth2:
+          resourceserver:
+            jwt:
+              issuer-uri: {{ .Values.oidcIssuer | required "An OIDC issuer needs to be configured!" | quote }}
+              jws-algorithms: [{{ .Values.api.jwsAlgorithm | default "RS256" | quote }}]
+              audiences: {{ .Values.api.oidcAudiences | default "tso_api" | quote }}
+      application:
+        name: {{ .Values.api.applicationName | default "api" | quote }}
+      datasource:
+        url: {{ .Values.database.jdbcUrl | required "A database has to be configured!" | quote }}
+        username: {{ .Values.database.username | quote }}
+        password: {{ .Values.database.password | quote }}
+      jpa:
+        hibernate:
+          ddl-auto: none
+      server:
+        port: {{ .Values.api.serverPort | default "8000" | int }}
+    management:
+      server:
+        port: {{ .Values.api.managementPort | int }}
