@@ -2,3 +2,10 @@ api:
   maxFileSize: "10MB"
   maxRequestSize: "11MB"
   managementPort: 9517
+
+imgproxy:
+  features:
+    urlSignature:
+      enabled: false
+    aws:
+      enabled: true

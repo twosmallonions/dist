@@ -31,3 +31,15 @@ data:
     management:
       server:
         port: {{ .Values.api.managementPort | int }}
+    tso:
+      upload:
+        endpoint: {{ .Values.s3.endpoint | quote }}
+        user-image-bucket: {{ .Values.s3.bucket | quote }}
+        aws-access-key: ${{ .Values.s3.access | quote }}
+        aws-secret-key: ${{ .Values.s3.secret | quote }}
+        region: {{ .Values.s3.region | quote }}
+        imgproxy-base-url: ${{ printf "http://%s-imgproxy:80" .Release.Name | quote }}
+      scraper:
+        py:
+          uri: http://127.0.0.1:8001
+          secret: insecure
