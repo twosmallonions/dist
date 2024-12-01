@@ -13,9 +13,9 @@ spring:
   application:
     name: "api"
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT:5432}/${POSTGRES_DB}
-    username: ${POSTGRES_USERNAME}
-    password: ${POSTGRES_PASSWORD}
+    url: "jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT:5432}/${POSTGRES_DB}"
+    username: "${POSTGRES_USERNAME}"
+    password: "${POSTGRES_PASSWORD}"
   jpa:
     hibernate:
       ddl-auto: none
@@ -29,17 +29,18 @@ logging:
     org.springframework.web: "${LOG_LEVEL:INFO}"
 tso:
   upload:
-    endpoint: ${UPLOAD_ENDPOINT}
-    user-image-bucket: ${UPLOAD_BUCKET}
-    aws-access-key: ${UPLOAD_ACCESS_KEY}
-    aws-secret-key: ${UPLOAD_SECRET_KEY}
-    region: ${UPLOAD_REGION}
-    imgproxy-base-url: ${UPLOAD_IMGPROXY}
+    endpoint: "${UPLOAD_ENDPOINT}"
+    user-image-bucket: "${UPLOAD_BUCKET}"
+    aws-access-key: "${UPLOAD_ACCESS_KEY}"
+    aws-secret-key: "${UPLOAD_SECRET_KEY}"
+    region: "${UPLOAD_REGION}"
+    imgproxy-base-url: "${UPLOAD_IMGPROXY}"
   scraper:
     py:
-      host: ${SCRAPER_HOST:tso-scraper-service}
+      host: "${SCRAPER_HOST:tso-scraper-service}"
       port: ${SCRAPER_PORT:50051}
-      client-certificate: ${SCRAPER_CLIENT_CERTIFICATE}
-      client-key: ${SCRAPER_CLIENT_KEY}
-      root-ca: ${SCRAPER_ROOT_CA}
-      enabled: ${SCRAPER_ENABLED:true}
+      client-certificate: "${SCRAPER_CLIENT_CERTIFICATE}"
+      client-key: "${SCRAPER_CLIENT_KEY}"
+      root-ca: "${SCRAPER_ROOT_CA}"
+      enabled: "${SCRAPER_ENABLED:true}"
+debug: ${DEBUG:false}
