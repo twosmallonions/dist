@@ -1,0 +1,16 @@
+resources:
+  - api.yaml
+configMapGenerator:
+  - name: tso-api-config
+    files:
+      - './application.yaml'
+  - name: tso-bff-config
+    envs:
+      - bff.env
+  - name: tso-scraper-config
+    envs:
+      - scraper.env
+  - name: caddy-config
+    files:
+      - './Caddyfile'
+namespace: tso

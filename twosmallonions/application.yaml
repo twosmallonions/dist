@@ -1,0 +1,45 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: "10MB"
+      max-request-size: "11MB"
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: <ISSUER>
+          jws-algorithms: "RS256"
+          audiences: "tso_api"
+  application:
+    name: "api"
+  datasource:
+    url: jdbc:postgresql://<POSTGRES HOST>:5432/<DB NAME>
+    username: <DB USERNAME>
+    password: <DB PASSWORD>
+  jpa:
+    hibernate:
+      ddl-auto: none
+server:
+  port: "8000"
+management:
+  server:
+    port: "9001"
+logging:
+  level:
+    org.springframework.web: DEBUG
+tso:
+  upload:
+    endpoint: <S3 COMPATIBLE ENDPOINT>
+    user-image-bucket: <BUCKET NAME>
+    aws-access-key: <ACCESS KEY>
+    aws-secret-key: <SECRET KEY>
+    region: <REGION>
+    imgproxy-base-url: <IMGPROXY HOST>
+  scraper:
+    py:
+      host: tso-scraper-service
+      port: 50051
+      client-certificate: ${SCRAPER_CLIENT_CERTIFICATE}
+      client-key: ${SCRAPER_CLIENT_KEY}
+      root-ca: ${SCRAPER_ROOT_CA}
+      enabled: true

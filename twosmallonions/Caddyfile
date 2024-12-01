@@ -1,0 +1,46 @@
+{
+	auto_https off
+	skip_install_trust
+}
+
+:80 {
+	@auth_with_cookie {
+		header Cookie *__Host-SESSION=*
+		path /api/*
+	}
+	handle @auth_with_cookie {
+		uri strip_prefix /api
+		route {
+			reverse_proxy http://tso-bff-service {
+				method	GET
+				rewrite /check
+
+				header_up X-Original-URI {uri}
+
+				@good {
+					status 2xx
+				}
+				handle_response @good {
+					request_header Authorization {rp.header.X-Bff-Access-Token}
+					request_header -Cookie
+					header +Set-Cookie {rp.header.X-Bff-Session-Cookie}
+				}
+				handle_response {
+					respond 401
+				}
+			}
+
+			reverse_proxy http://tso-api-service
+		}
+	}
+
+	handle /api/* {
+		reverse_proxy http://tso-api-service
+	}
+
+	handle /auth/* {
+		reverse_proxy http://tso-bff-service
+	}
+
+	respond /health 200
+}

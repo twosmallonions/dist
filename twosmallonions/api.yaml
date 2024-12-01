@@ -1,0 +1,335 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: scraper-server-cert
+spec:
+  secretName: scraper-server-cert
+  commonName: tso-scraper
+  usages:
+    - "digital signature"
+    - "key encipherment"
+  issuerRef:
+    name: tso-ca-issuer
+    kind: ClusterIssuer
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS8
+    size: 2048
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: scraper-api-client-cert
+spec:
+  secretName: scraper-api-client-cert
+  commonName: tso-api-scraper-client
+  usages:
+    - "client auth"
+    - "digital signature"
+    - "key encipherment"
+  issuerRef:
+    name: tso-ca-issuer
+    kind: ClusterIssuer
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS8
+    size: 2048
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tso-api
+  labels:
+    apps: tso-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tso-api
+  template:
+    metadata:
+      labels:
+        app: tso-api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/twosmallonions/api:latest
+          volumeMounts:
+            - name: config-volume
+              mountPath: /workspace/config
+              readOnly: true
+            - name: cert-volume
+              mountPath: /workspace/certs
+              readOnly: true
+          env:
+            - name: SPRING_CONFIG_LOCATION
+              value: file:/workspace/config/application.yaml
+            - name: SCRAPER_CLIENT_CERTIFICATE
+              value: /workspace/certs/tls.crt
+            - name: SCRAPER_CLIENT_KEY
+              value: /workspace/certs/tls.key
+            - name: SCRAPER_ROOT_CA
+              value: /workspace/certs/ca.crt
+          ports:
+            - containerPort: 8000
+              name: api-port
+            - containerPort: 9001
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1G"
+            limits:
+              cpu: "2"
+              memory: "2G"
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9001
+            periodSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 9001
+            periodSeconds: 3
+            failureThreshold: 10
+
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 9001
+            failureThreshold: 24
+            periodSeconds: 5
+      volumes:
+        - name: config-volume
+          configMap:
+            name: tso-api-config
+        - name: cert-volume
+          secret:
+            secretName: scraper-api-client-cert
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tso-api-service
+spec:
+  selector:
+    app: tso-api
+  ports:
+  - port: 80
+    targetPort: 8000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tso-bff
+spec:
+  selector:
+    matchLabels:
+      app: tso-bff
+  template:
+    metadata:
+      labels:
+        app: tso-bff
+    spec:
+      containers:
+      - name: tso-bff
+        image: ghcr.io/twosmallonions/bff:latest
+        ports:
+          - containerPort: 8082
+        envFrom:
+          - configMapRef:
+              name: tso-bff-config
+
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "500M"
+          limits:
+            cpu: "1000m"
+            memory: "1G"
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          periodSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8082
+          periodSeconds: 3
+          failureThreshold: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tso-bff-service
+spec:
+  selector:
+    app: tso-bff
+  ports:
+  - port: 80
+    targetPort: 8082
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tso-scraper
+spec:
+  selector:
+    matchLabels:
+      app: tso-scraper
+  template:
+    metadata:
+      labels:
+        app: tso-scraper
+    spec:
+      containers:
+      - name: tso-scraper
+        image: ghcr.io/twosmallonions/tso-scraper:latest
+        ports:
+          - containerPort: 50051
+          - containerPort: 23867
+        envFrom:
+          - configMapRef:
+              name: tso-scraper-config
+        env:
+          - name: SCRAPER_SERVER_CERT
+            value: /certs/tls.crt
+          - name: SCRAPER_SERVER_CERT_KEY
+            value: /certs/tls.key
+          - name: SCRAPER_CA_CERT
+            value: /certs/ca.crt
+
+        volumeMounts:
+          - name: cert-volume
+            mountPath: /certs
+            readOnly: true
+
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "500M"
+          limits:
+            cpu: "1000m"
+            memory: "1G"
+
+        livenessProbe:
+          grpc:
+            port: 23867
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          grpc:
+            port: 23867
+          periodSeconds: 3
+          failureThreshold: 10
+
+      volumes:
+        - name: cert-volume
+          secret:
+            secretName: scraper-server-cert
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tso-scraper-service
+spec:
+  selector:
+    app: tso-scraper
+  ports:
+  - port: 50051
+    targetPort: 50051
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tso-caddy
+spec:
+  selector:
+    matchLabels:
+      app: tso-caddy
+  template:
+    metadata:
+      labels:
+        app: tso-caddy
+    spec:
+      containers:
+      - name: tso-caddy
+        image: caddy:latest
+        ports:
+          - containerPort: 80
+        volumeMounts:
+          - name: caddy-config
+            mountPath: /etc/caddy/
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "500M"
+          limits:
+            cpu: "1"
+            memory: "1G"
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          periodSeconds: 5
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          periodSeconds: 3
+          failureThreshold: 10
+      volumes:
+        - name: caddy-config
+          configMap:
+            name: caddy-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tso-caddy-service
+spec:
+  type: NodePort
+  selector:
+    app: tso-caddy
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30007
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
+  name: tso
+  labels:
+    name: tso
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: app.twosmallonions.com
+    http:
+      paths:
+      - pathType: ImplementationSpecific
+        path: "/"
+        backend:
+          service:
+            name: tso-caddy-service
+            port: 
+              number: 80
+  tls:
+  - hosts:
+    - app.twosmallonions.com
+    secretName: app-twosmallonions-tls
