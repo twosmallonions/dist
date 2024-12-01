@@ -21,6 +21,7 @@ jobs:
       - run: |
           echo "image: $IMAGE"
           echo "tag: $TAG"
+          env
         env:
           IMAGE: ${{ inputs.image }}
           TAG: ${{ inputs.tag }}
