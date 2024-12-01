@@ -1,0 +1,26 @@
+name: Update image tag to latest git commit
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: 'The image to update the tag of'
+        required: true
+        type: string
+      tag:
+        description: 'The tag to update to'
+        required: true
+        type: string
+
+jobs:
+  update:
+    name: Update tags
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          echo "image: $IMAGE"
+          echo "tag: $TAG"
+        env:
+          IMAGE: ${{ inputs.image }}
+          TAG: ${{ inputs.tag }}
