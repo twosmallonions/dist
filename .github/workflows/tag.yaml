@@ -1,5 +1,8 @@
 name: Update image tag to latest git commit
 
+env:
+  KUSTOMIZATION_YAML: "./twosmallonions/kustomization.yaml"
+
 on:
   workflow_dispatch:
     inputs:
@@ -19,9 +22,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          echo "image: $IMAGE"
-          echo "tag: $TAG"
-          env
+          yq -e ".images[] | select(.name==\"$IMAGE\")" ./twosmallonions/kustomization.yaml
+          yq -i "(.images[] | select(.name==\"$IMAGE\") | .newTag) |= \"$TAG\"" ./twosmallonions/kustomization.yaml
+        env:
+          IMAGE: ${{ inputs.image }}
+          TAG: ${{ inputs.tag }}
+        name: Update tag
+      - run: |
+          git config --global user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add twosmallonions/kustomization.yaml
+          git commit -m "Update $IMAGE to tag $TAG"
+          git push
         env:
           IMAGE: ${{ inputs.image }}
           TAG: ${{ inputs.tag }}

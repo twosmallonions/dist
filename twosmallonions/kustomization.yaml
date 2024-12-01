@@ -17,11 +17,10 @@ configMapGenerator:
     envs:
       - api.env
 namespace: tso
-
 images:
   - name: ghcr.io/twosmallonions/api
     newTag: "213458e"
-  - name: ghcr.io/twosmallonions/api
+  - name: ghcr.io/twosmallonions/bff
     newTag: "9b12494"
   - name: ghcr.io/twosmallonions/tso-scraper
     newTag: "212e335"
