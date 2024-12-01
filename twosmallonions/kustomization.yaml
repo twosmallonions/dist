@@ -23,4 +23,4 @@ images:
   - name: ghcr.io/twosmallonions/bff
     newTag: "9b12494"
   - name: ghcr.io/twosmallonions/tso-scraper
-    newTag: "TEST"
+    newTag: "7261abd"
