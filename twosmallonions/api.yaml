@@ -70,6 +70,24 @@ spec:
               value: /workspace/certs/tls.key
             - name: SCRAPER_ROOT_CA
               value: /workspace/certs/ca.crt
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tso-api-postgres-password
+                  key: password
+            - name: UPLOAD_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: tso-api-s3-upload
+                  key: key
+            - name: UPLOAD_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: tso-api-s3-upload
+                  key: secret
+          envFrom:
+            - configMapRef:
+                name: tso-api-env
           ports:
             - containerPort: 8000
               name: api-port

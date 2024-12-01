@@ -13,4 +13,7 @@ configMapGenerator:
   - name: caddy-config
     files:
       - './Caddyfile'
+  - name: tso-api-env
+    envs:
+      - api.env
 namespace: tso
