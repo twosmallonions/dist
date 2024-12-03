@@ -1,0 +1,31 @@
+name: update tag
+description: Update the image tag in kustomization.yaml
+inputs:
+  image:
+    description: image name
+    required: true
+  tag:
+    description: the tag of the image
+    required: true
+  token:
+    description: the github token to use
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/github-script@v7
+      id: run-workflow
+      name: Trigger kustomize update
+      with:
+        script: |
+          github.rest.actions.createWorkflowDispatch({
+            owner: "twosmallonions",
+            repo: "dist",
+            workflow_id: "tag.yaml",
+            ref: "main",
+            inputs: {
+              image: "${{ inputs.image }}",
+              tag: "${{ inputs.tag }}"
+            } 
+          })
+        github-token: ${{ inputs.token }}
