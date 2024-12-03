@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          yq -e ".images[] | select(.name==\"$IMAGE\")" ./twosmallonions/kustomization.yaml
+          yq -e ".images[] | select(.name==\"$IMAGE\")" ./twosmallonions/kustomization.yaml > /dev/null
           yq -i "(.images[] | select(.name==\"$IMAGE\") | .newTag) |= \"$TAG\"" ./twosmallonions/kustomization.yaml
         env:
           IMAGE: ${{ inputs.image }}
