@@ -51,6 +51,16 @@ spec:
       labels:
         app: tso-api
     spec:
+      initContainers:
+        - name: keycloak-up
+          image: busybox:1.37
+          command: ['sh', '-c', 'until $(wget -O- "$OIDC_ISSUER" > /dev/null); do sleep 10; done']
+          env:
+            - name: OIDC_ISSUER
+              valueFrom:
+                configMapKeyRef:
+                  key: OIDC_ISSUER
+                  name: tso-api-env
       containers:
         - name: api
           image: ghcr.io/twosmallonions/api:latest
@@ -152,6 +162,16 @@ spec:
       labels:
         app: tso-bff
     spec:
+      initContainers:
+        - name: keycloak-up
+          image: busybox:1.37
+          command: ['sh', '-c', 'until $(wget -O- "$OIDC_ISSUER" > /dev/null); do sleep 10; done']
+          env:
+            - name: OIDC_ISSUER
+              valueFrom:
+                configMapKeyRef:
+                  key: BFF_OIDC_ISSUER
+                  name: tso-bff-config
       containers:
       - name: tso-bff
         image: ghcr.io/twosmallonions/bff:latest
