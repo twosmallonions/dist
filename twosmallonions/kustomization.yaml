@@ -21,6 +21,6 @@ images:
   - name: ghcr.io/twosmallonions/api
     newTag: "c29eb6d"
   - name: ghcr.io/twosmallonions/bff
-    newTag: "19d1a5c"
+    newTag: "1e7ce26"
   - name: ghcr.io/twosmallonions/tso-scraper
     newTag: "6142a0b"
