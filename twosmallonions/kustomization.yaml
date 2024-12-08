@@ -19,7 +19,7 @@ configMapGenerator:
 namespace: tso
 images:
   - name: ghcr.io/twosmallonions/api
-    newTag: "c29eb6d"
+    newTag: "4edb1c7"
   - name: ghcr.io/twosmallonions/bff
     newTag: "1e7ce26"
   - name: ghcr.io/twosmallonions/tso-scraper
