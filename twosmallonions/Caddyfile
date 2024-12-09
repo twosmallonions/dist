@@ -38,6 +38,7 @@
 		reverse_proxy http://tso-api-service
 	}
 
+	rewrite /auth /auth/
 	handle /auth/* {
 		reverse_proxy http://tso-bff-service
 	}
