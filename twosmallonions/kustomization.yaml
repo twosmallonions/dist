@@ -1,5 +1,6 @@
 resources:
   - api.yaml
+  - web.yaml
 configMapGenerator:
   - name: tso-api-config
     files:

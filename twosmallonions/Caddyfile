@@ -43,4 +43,6 @@
 	}
 
 	respond /health 200
+
+	reverse_proxy http://tso-web-service
 }
