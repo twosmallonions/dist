@@ -44,6 +44,8 @@
 	}
 
 	respond /health 200
+	
+	reverse_proxy /whoami http://tso-whoami-service
 
 	reverse_proxy http://tso-web-service
 }
