@@ -27,4 +27,4 @@ images:
   - name: ghcr.io/twosmallonions/tso-scraper
     newTag: "6142a0b"
   - name: ghcr.io/twosmallonions/web
-    newTag: "9050740"
+    newTag: "cc6f4a0"
